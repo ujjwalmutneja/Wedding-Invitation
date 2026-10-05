@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Local binary tools
+cloudflared.exe
+
+# Video frame dumps
+video_frames/
+video_frames_detailed/
+video_frames_inviationa/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
