@@ -1,8 +1,9 @@
 # Dependencies
 node_modules/
 
-# Local binary tools
+# Local binary tools & scripts
 cloudflared.exe
+*.bat
 
 # Video frame dumps
 video_frames/
