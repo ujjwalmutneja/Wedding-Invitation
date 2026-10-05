@@ -2,18 +2,20 @@ import React, { useState, useEffect } from "react";
 import { Check, Heart, Send, MessageCircle, Sparkles } from "lucide-react";
 import confetti from "canvas-confetti";
 import { weddingData } from "../data/weddingData";
+import { useInvitation } from "../context/InvitationContext";
 
 export default function RSVPSection() {
-  const { rsvp, couple, events } = weddingData;
+  const { rsvp, couple } = weddingData;
+  const { events, guestName, typeName } = useInvitation();
 
-  const [formData, setFormData] = useState({
-    name: "",
+  const [formData, setFormData] = useState(() => ({
+    name: guestName || "",
     attending: "yes",
     guestCount: "2",
-    selectedEvents: ["mehendi", "haldi", "sangeet", "wedding"],
+    selectedEvents: events.map((e) => e.id),
     dietary: "",
     message: "",
-  });
+  }));
 
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -21,11 +23,29 @@ export default function RSVPSection() {
     const saved = localStorage.getItem("wedding_rsvp_data");
     if (saved) {
       try {
-        setFormData(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setFormData((prev) => ({
+          ...parsed,
+          name: parsed.name || guestName || "",
+        }));
         setIsSubmitted(true);
       } catch (e) {}
+    } else if (guestName) {
+      setFormData((prev) => ({ ...prev, name: guestName }));
     }
-  }, []);
+  }, [guestName]);
+
+  useEffect(() => {
+    // Keep selected events aligned with current invitation tier
+    setFormData((prev) => {
+      const validIds = events.map((e) => e.id);
+      const filtered = prev.selectedEvents.filter((id) => validIds.includes(id));
+      return {
+        ...prev,
+        selectedEvents: filtered.length > 0 ? filtered : validIds,
+      };
+    });
+  }, [events]);
 
   const handleEventToggle = (eventId) => {
     setFormData((prev) => {
@@ -462,7 +482,7 @@ export default function RSVPSection() {
                       textTransform: "uppercase",
                     }}
                   >
-                    EVENTS YOU WILL ATTEND
+                    {events.length === 1 ? "FUNCTION ATTENDING" : "EVENTS YOU WILL ATTEND"}
                   </label>
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                     {events.map((ev) => {

@@ -4,9 +4,11 @@ import SageMedallionSeal from "./SageMedallionSeal";
 import NightReceptionScene from "./NightReceptionScene";
 import { weddingData } from "../data/weddingData";
 import { audioEngine } from "../utils/audioEngine";
+import { useInvitation } from "../context/InvitationContext";
 
 export default function EnvelopeOpeningExperience({ onOpened, onReplay, onScrollToNext }) {
   const { couple } = weddingData;
+  const { guestName } = useInvitation();
 
   // Animation Sequence States:
   // 'closed' -> 'pressed' -> 'glowing' -> 'opening' -> 'curtains_parting' -> 'revealed'
@@ -659,6 +661,26 @@ export default function EnvelopeOpeningExperience({ onOpened, onReplay, onScroll
                 animation: "sealBreathingGlow 3.5s infinite ease-in-out",
               }}
             >
+              {guestName && (
+                <div
+                  style={{
+                    background: "rgba(22, 28, 22, 0.8)",
+                    border: "1px solid rgba(197, 160, 89, 0.45)",
+                    backdropFilter: "blur(8px)",
+                    borderRadius: "999px",
+                    padding: "4px 16px",
+                    color: "#F4E8DB",
+                    fontFamily: "var(--font-cinzel)",
+                    fontSize: "10.5px",
+                    letterSpacing: "1.5px",
+                    textTransform: "uppercase",
+                    boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
+                    marginBottom: "4px",
+                  }}
+                >
+                  FOR: {guestName}
+                </div>
+              )}
               <SageMedallionSeal
                 monogram={couple.monogram}
                 subtitle="TAP TO OPEN"

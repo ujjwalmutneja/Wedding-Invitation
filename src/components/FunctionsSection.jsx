@@ -11,10 +11,10 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { weddingData } from "../data/weddingData";
+import { useInvitation } from "../context/InvitationContext";
 
 export default function FunctionsSection() {
-  const { events } = weddingData;
+  const { events, type, typeName } = useInvitation();
   const [activeEventIndex, setActiveEventIndex] = useState(0);
 
   const getEventIcon = (iconName) => {
@@ -33,15 +33,18 @@ export default function FunctionsSection() {
     }
   };
 
+  const safeIndex = activeEventIndex < events.length ? activeEventIndex : 0;
+  const currentEvent = events[safeIndex] || events[0];
+
   const nextEvent = () => {
+    if (events.length <= 1) return;
     setActiveEventIndex((prev) => (prev + 1) % events.length);
   };
 
   const prevEvent = () => {
+    if (events.length <= 1) return;
     setActiveEventIndex((prev) => (prev - 1 + events.length) % events.length);
   };
-
-  const currentEvent = events[activeEventIndex];
 
   return (
     <section
@@ -79,7 +82,7 @@ export default function FunctionsSection() {
             color: "var(--color-text-main)",
           }}
         >
-          Wedding Functions
+          {events.length === 1 ? "The Wedding Ceremony" : "Wedding Functions"}
         </h2>
         <p
           style={{
@@ -89,56 +92,60 @@ export default function FunctionsSection() {
             marginTop: "4px",
           }}
         >
-          Swipe or tap the tabs below to explore each ceremony
+          {events.length === 1
+            ? "We request the honor of your presence at the auspicious wedding ceremony"
+            : "Swipe or tap the tabs below to explore each ceremony"}
         </p>
       </div>
 
-      {/* Interactive Tabs Header */}
-      <div
-        style={{
-          display: "flex",
-          gap: "6px",
-          overflowX: "auto",
-          maxWidth: "100%",
-          padding: "4px 8px 12px",
-          scrollbarWidth: "none",
-          WebkitOverflowScrolling: "touch",
-          marginBottom: "16px",
-        }}
-      >
-        {events.map((ev, idx) => (
-          <button
-            key={ev.id}
-            onClick={() => setActiveEventIndex(idx)}
-            style={{
-              flexShrink: 0,
-              padding: "8px 14px",
-              borderRadius: "999px",
-              fontFamily: "var(--font-cinzel)",
-              fontSize: "10px",
-              fontWeight: "600",
-              letterSpacing: "1px",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              border:
-                activeEventIndex === idx
-                  ? "1px solid #C5A059"
-                  : "1px solid rgba(197, 160, 89, 0.25)",
-              background:
-                activeEventIndex === idx
-                  ? "linear-gradient(135deg, #C5A059 0%, #D8B775 100%)"
-                  : "rgba(255, 255, 255, 0.8)",
-              color: activeEventIndex === idx ? "#FFFFFF" : "#594E48",
-              boxShadow:
-                activeEventIndex === idx
-                  ? "0 4px 14px rgba(197, 160, 89, 0.35)"
-                  : "none",
-            }}
-          >
-            {ev.tabName || ev.name}
-          </button>
-        ))}
-      </div>
+      {/* Interactive Tabs Header (rendered only when more than 1 event) */}
+      {events.length > 1 && (
+        <div
+          style={{
+            display: "flex",
+            gap: "6px",
+            overflowX: "auto",
+            maxWidth: "100%",
+            padding: "4px 8px 12px",
+            scrollbarWidth: "none",
+            WebkitOverflowScrolling: "touch",
+            marginBottom: "16px",
+          }}
+        >
+          {events.map((ev, idx) => (
+            <button
+              key={ev.id}
+              onClick={() => setActiveEventIndex(idx)}
+              style={{
+                flexShrink: 0,
+                padding: "8px 16px",
+                borderRadius: "999px",
+                fontFamily: "var(--font-cinzel)",
+                fontSize: "11px",
+                fontWeight: "600",
+                letterSpacing: "1px",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                border:
+                  safeIndex === idx
+                    ? "1px solid #C5A059"
+                    : "1px solid rgba(197, 160, 89, 0.25)",
+                background:
+                  safeIndex === idx
+                    ? "linear-gradient(135deg, #C5A059 0%, #D8B775 100%)"
+                    : "rgba(255, 255, 255, 0.8)",
+                color: safeIndex === idx ? "#FFFFFF" : "#594E48",
+                boxShadow:
+                  safeIndex === idx
+                    ? "0 4px 14px rgba(197, 160, 89, 0.35)"
+                    : "none",
+              }}
+            >
+              {ev.tabName || ev.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Main Active Event Card with Illustration */}
       <div
@@ -156,6 +163,7 @@ export default function FunctionsSection() {
         {/* Event Watercolor Illustration with Parallax feel */}
         <div style={{ position: "relative", width: "100%", height: "240px", overflow: "hidden" }}>
           <img
+            key={currentEvent.image}
             src={currentEvent.image}
             alt={currentEvent.name}
             style={{
@@ -178,52 +186,56 @@ export default function FunctionsSection() {
             }}
           />
 
-          {/* Navigation Arrows on image */}
-          <button
-            onClick={prevEvent}
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "10px",
-              transform: "translateY(-50%)",
-              width: "32px",
-              height: "32px",
-              borderRadius: "50%",
-              background: "rgba(255, 255, 255, 0.85)",
-              border: "1px solid rgba(197, 160, 89, 0.4)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-            }}
-            aria-label="Previous Function"
-          >
-            <ChevronLeft size={18} color="#2D2522" />
-          </button>
+          {/* Navigation Arrows on image (only if multiple events) */}
+          {events.length > 1 && (
+            <>
+              <button
+                onClick={prevEvent}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "10px",
+                  transform: "translateY(-50%)",
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "50%",
+                  background: "rgba(255, 255, 255, 0.85)",
+                  border: "1px solid rgba(197, 160, 89, 0.4)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                }}
+                aria-label="Previous Function"
+              >
+                <ChevronLeft size={18} color="#2D2522" />
+              </button>
 
-          <button
-            onClick={nextEvent}
-            style={{
-              position: "absolute",
-              top: "50%",
-              right: "10px",
-              transform: "translateY(-50%)",
-              width: "32px",
-              height: "32px",
-              borderRadius: "50%",
-              background: "rgba(255, 255, 255, 0.85)",
-              border: "1px solid rgba(197, 160, 89, 0.4)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-            }}
-            aria-label="Next Function"
-          >
-            <ChevronRight size={18} color="#2D2522" />
-          </button>
+              <button
+                onClick={nextEvent}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  right: "10px",
+                  transform: "translateY(-50%)",
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "50%",
+                  background: "rgba(255, 255, 255, 0.85)",
+                  border: "1px solid rgba(197, 160, 89, 0.4)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                }}
+                aria-label="Next Function"
+              >
+                <ChevronRight size={18} color="#2D2522" />
+              </button>
+            </>
+          )}
         </div>
 
         {/* Event Content Details */}
@@ -259,10 +271,10 @@ export default function FunctionsSection() {
           <h3
             style={{
               fontFamily: "var(--font-serif)",
-              fontSize: "26px",
+              fontSize: "24px",
               fontWeight: "600",
               color: "var(--color-text-main)",
-              letterSpacing: "1.5px",
+              letterSpacing: "1px",
               marginBottom: "12px",
             }}
           >
@@ -272,25 +284,27 @@ export default function FunctionsSection() {
           <p
             style={{
               fontFamily: "var(--font-sans)",
-              fontSize: "12px",
+              fontSize: "12.5px",
               color: "var(--color-text-body)",
               lineHeight: "1.6",
               marginBottom: "20px",
+              maxWidth: "340px",
+              margin: "0 auto 20px",
             }}
           >
             {currentEvent.description}
           </p>
 
-          {/* Details List */}
+          {/* Key Event Details: Date, Time, Venue */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "14px",
+              gap: "10px",
               background: "rgba(250, 246, 240, 0.7)",
-              padding: "18px 20px",
+              padding: "16px",
               borderRadius: "14px",
-              border: "1px solid rgba(197, 160, 89, 0.25)",
+              border: "1px solid rgba(197, 160, 89, 0.2)",
               textAlign: "left",
             }}
           >
@@ -414,25 +428,27 @@ export default function FunctionsSection() {
         </div>
       </div>
 
-      {/* Carousel Dots */}
-      <div style={{ display: "flex", gap: "8px", marginTop: "18px" }}>
-        {events.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setActiveEventIndex(idx)}
-            style={{
-              width: activeEventIndex === idx ? "24px" : "8px",
-              height: "8px",
-              borderRadius: "999px",
-              background: activeEventIndex === idx ? "#C5A059" : "rgba(197, 160, 89, 0.3)",
-              border: "none",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-            }}
-            aria-label={`Go to event ${idx + 1}`}
-          />
-        ))}
-      </div>
+      {/* Carousel Dots (rendered only when more than 1 event) */}
+      {events.length > 1 && (
+        <div style={{ display: "flex", gap: "8px", marginTop: "18px" }}>
+          {events.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveEventIndex(idx)}
+              style={{
+                width: safeIndex === idx ? "24px" : "8px",
+                height: "8px",
+                borderRadius: "999px",
+                background: safeIndex === idx ? "#C5A059" : "rgba(197, 160, 89, 0.3)",
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+              }}
+              aria-label={`Go to event ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
