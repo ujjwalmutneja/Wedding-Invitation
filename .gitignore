@@ -5,7 +5,8 @@ node_modules/
 cloudflared.exe
 *.bat
 
-# Video frame dumps
+# Videos and frame dumps
+*.mp4
 video_frames/
 video_frames_detailed/
 video_frames_inviationa/
